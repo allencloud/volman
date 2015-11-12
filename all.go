@@ -41,7 +41,7 @@ func GetOne(c *cli.Context) {
 	sum := 0
 	var rightone os.FileInfo
 	input := c.Args()[0]
-	fmt.Println(input)
+	//fmt.Println(input)
 	for _, dir := range dirs {
 		if strings.Contains(dir.Name(), input) == true {
 			rightone = dir

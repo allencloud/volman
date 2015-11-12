@@ -10,7 +10,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "volman"
 	app.Usage = "A tool for docker container's volume management."
-	app.Version = "1.0.0"
+	app.Version = "0.0.1"
 
 	app.Author = "Allen Sun"
 	app.Email = "allen.sun@daocloud.io"
