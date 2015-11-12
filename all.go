@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 var (
@@ -63,7 +62,7 @@ func GetConVolumes(dir os.FileInfo) error {
 	var config Config
 	_ = json.Unmarshal(configDataBytes, &config)
 
-	fmt.Println(config)
+	//fmt.Println(config)
 
 	var err error
 
@@ -101,9 +100,9 @@ func checkDataVolume(mounts map[string]Mount) error {
 	for _, value := range mounts {
 		name := value.Name
 		destination := value.Destination
-		fmt.Println("Destination:" + destination)
+		//fmt.Println("Destination:" + destination)
 		volume_path := filepath.Join(volumes_root, name, "_data")
-		fmt.Println("Source:" + volume_path)
+		//fmt.Println("Source:" + volume_path)
 
 		if name != "" {
 			// it means it is a data volume
