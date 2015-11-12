@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"github.com/codegangsta/cli"
 	"os"
 	"time"

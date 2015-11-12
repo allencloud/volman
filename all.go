@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 var (
@@ -62,6 +63,8 @@ func GetConVolumes(dir os.FileInfo) error {
 	var config Config
 	_ = json.Unmarshal(configDataBytes, &config)
 
+	fmt.Println(config)
+
 	var err error
 
 	if err = checkSize("resolve.conf", config.ResolveConfPath); err != nil {
@@ -102,13 +105,15 @@ func checkDataVolume(mounts map[string]Mount) error {
 		volume_path := filepath.Join(volumes_root, name, "_data")
 		fmt.Println("Source:" + volume_path)
 
-		size := 0
-		filepath.Walk(volume_path, func(_ string, file os.FileInfo, _ error) error {
-			size += int(file.Size())
-			return nil
-		})
-		fmt.Println("Volume Space Size:", size)
+		if strings.Contains(source, volumes_root) == true {
+			// it means it is a data volume
+			size := 0
+			filepath.Walk(volume_path, func(_ string, file os.FileInfo, _ error) error {
+				size += int(file.Size())
+				return nil
+			})
+			fmt.Println("Volume Space Size:", size)
+		}
 	}
-
 	return nil
 }
