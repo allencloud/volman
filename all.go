@@ -1,6 +1,7 @@
 package main
 
 import (
+	"./utils"
 	"encoding/json"
 	"fmt"
 	"github.com/codegangsta/cli"
@@ -125,7 +126,7 @@ func checkSize(filename string, path string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(f.Size())
+	fmt.Println(utils.Convert(f.Size()))
 	return nil
 }
 
@@ -140,12 +141,13 @@ func checkDataVolume(mounts map[string]Mount) error {
 			index++
 
 			// it means it is a data volume
-			size := 0
+			size := int64(0)
 			filepath.Walk(volume_path, func(_ string, file os.FileInfo, _ error) error {
-				size += int(file.Size())
+				size += file.Size()
 				return nil
 			})
-			fmt.Println("Volume Space Size:", size)
+			result := utils.Convert(size)
+			fmt.Println("Volume Space Size:", result)
 		}
 	}
 
