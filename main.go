@@ -60,4 +60,6 @@ func main() {
 			Action: GetAll,
 		},
 	}
+
+	app.Run(os.Args)
 }

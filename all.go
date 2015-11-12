@@ -1,9 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/codegangsta/cli"
-	"io/ioutils"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -15,19 +16,19 @@ var (
 )
 
 type Config struct {
-	ID              string             `json:"ID"`
-	Pid             int                `json:"Pid"`
-	Name            string             `json:"Name"`
-	ResolveConfPath string             `json:"ResolvConfPath"`
-	HostnamePath    string             `json:"HostnamePath"`
-	HostsPath       string             `json:"HostsPath"`
-	LogPath         string             `json:"LogPath"`
-	MountPoints     []map[string]Mount `json:"MountPoints"`
+	ID              string           `json:"ID"`
+	Pid             int              `json:"Pid"`
+	Name            string           `json:"Name"`
+	ResolveConfPath string           `json:"ResolvConfPath"`
+	HostnamePath    string           `json:"HostnamePath"`
+	HostsPath       string           `json:"HostsPath"`
+	LogPath         string           `json:"LogPath"`
+	MountPoints     map[string]Mount `json:"MountPoints"`
 }
 
 type Mount struct {
 	Name        string `json:"Name"`
-	Destination `json:"Destination"`
+	Destination string `json:"Destination"`
 }
 
 func GetAll(c *cli.Context) {
@@ -37,6 +38,7 @@ func GetAll(c *cli.Context) {
 	}
 
 	for _, dir := range dirs {
+		fmt.Println("\nContainer " + dir.Name())
 		if err := GetConVolumes(dir); err != nil {
 			fmt.Println("Container " + dir.Name() + " has no volume details.")
 			continue
@@ -77,6 +79,7 @@ func GetConVolumes(dir os.FileInfo) error {
 	if err := checkDataVolume(config.MountPoints); err != nil {
 		fmt.Println("")
 	}
+	return nil
 }
 
 func checkSize(filename string, path string) error {
@@ -91,20 +94,21 @@ func checkSize(filename string, path string) error {
 	return nil
 }
 
-func checkDataVolume(mounts []map[string]Mount) error {
-	for _, mount := range mounts {
-		for _, value := range mount {
-			name := value.Name
-			destination := value.Destination
-			fmt.Println("Destination:" + destination)
-			volume_path := filepath.Join(volumes_root, name, "_data")
-			fmt.Println("Source:" + volume_path)
+func checkDataVolume(mounts map[string]Mount) error {
+	for _, value := range mounts {
+		name := value.Name
+		destination := value.Destination
+		fmt.Println("Destination:" + destination)
+		volume_path := filepath.Join(volumes_root, name, "_data")
+		fmt.Println("Source:" + volume_path)
 
-			size := 0
-			filepath.Walk(volume_path, func(_ string, file os.FileInfo, _ error) error {
-				size += int(file.Size())
-			})
-			fmt.Println("Volume Space Size:", size)
-		}
+		size := 0
+		filepath.Walk(volume_path, func(_ string, file os.FileInfo, _ error) error {
+			size += int(file.Size())
+			return nil
+		})
+		fmt.Println("Volume Space Size:", size)
 	}
+
+	return nil
 }
