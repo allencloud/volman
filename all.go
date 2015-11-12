@@ -1,0 +1,110 @@
+package main
+
+import (
+	"fmt"
+	"github.com/codegangsta/cli"
+	"io/ioutils"
+	"os"
+	"path/filepath"
+)
+
+var (
+	docker_root     = "/var/lib/docker"
+	containers_root = filepath.Join(docker_root, "containers")
+	volumes_root    = filepath.Join(docker_root, "volumes")
+)
+
+type Config struct {
+	ID              string             `json:"ID"`
+	Pid             int                `json:"Pid"`
+	Name            string             `json:"Name"`
+	ResolveConfPath string             `json:"ResolvConfPath"`
+	HostnamePath    string             `json:"HostnamePath"`
+	HostsPath       string             `json:"HostsPath"`
+	LogPath         string             `json:"LogPath"`
+	MountPoints     []map[string]Mount `json:"MountPoints"`
+}
+
+type Mount struct {
+	Name        string `json:"Name"`
+	Destination `json:"Destination"`
+}
+
+func GetAll(c *cli.Context) {
+	dirs, err := ioutil.ReadDir(containers_root)
+	if err != nil {
+		fmt.Println("Readdir Error")
+	}
+
+	for _, dir := range dirs {
+		if err := GetConVolumes(dir); err != nil {
+			fmt.Println("Container " + dir.Name() + " has no volume details.")
+			continue
+		}
+	}
+}
+
+func GetConVolumes(dir os.FileInfo) error {
+	container_config_path := filepath.Join(containers_root, dir.Name(), "config.json")
+
+	fi, _ := os.Open(container_config_path)
+	defer fi.Close()
+
+	fd, _ := ioutil.ReadAll(fi)
+	// Get all data from config.json
+	configData := string(fd)
+	// Tranfer configData to []byte
+	configDataBytes := []byte(configData)
+
+	// Start to convert []bytes into map
+	var config Config
+	_ = json.Unmarshal(configDataBytes, &config)
+
+	var err error
+
+	if err = checkSize("resolve.conf", config.ResolveConfPath); err != nil {
+		fmt.Println("")
+	}
+
+	if err = checkSize("hostname", config.HostnamePath); err != nil {
+		fmt.Println("")
+	}
+
+	if err = checkSize("hosts", config.HostsPath); err != nil {
+		fmt.Println("")
+	}
+
+	if err := checkDataVolume(config.MountPoints); err != nil {
+		fmt.Println("")
+	}
+}
+
+func checkSize(filename string, path string) error {
+	fmt.Print(filename + " Size: ")
+
+	f, err := os.Lstat(path)
+
+	if err != nil {
+		return err
+	}
+	fmt.Println(f.Size())
+	return nil
+}
+
+func checkDataVolume(mounts []map[string]Mount) error {
+	for _, mount := range mounts {
+		for _, value := range mount {
+			name := value.Name
+			destination := value.Destination
+			fmt.Println("Destination:" + destination)
+			volume_path := filepath.Join(volumes_root, name, "_data")
+			fmt.Println("Source:" + volume_path)
+
+			size := 0
+			filepath.Walk(volume_path, func(_ string, file os.FileInfo, _ error) error {
+				size += int(file.Size())
+			})
+			fmt.Println("Volume Space Size:", size)
+		}
+	}
+}
