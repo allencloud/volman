@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 var (
@@ -31,6 +32,32 @@ type Mount struct {
 	Destination string `json:"Destination"`
 }
 
+func GetOne(c *cli.Context) {
+	dirs, err := ioutil.ReadDir(containers_root)
+	if err != nil {
+		fmt.Println("Readdir Error")
+	}
+	sum := 0
+	var rightone os.FileInfo
+	input := c.Args()[2]
+	fmt.Println(input)
+	for _, dir := range dirs {
+		if strings.Contains(dir.Name(), input) == true {
+			rightone = dir
+			sum++
+			if sum >= 2 {
+				fmt.Println("More than 2 containers' ID has your input prefix.")
+				fmt.Println("Please check your input.")
+				os.Exit(1)
+			}
+		}
+	}
+
+	if err := GetConVolumes(rightone); err != nil {
+		fmt.Println("Container " + rightone.Name() + " has no volume details.")
+	}
+}
+
 func GetAll(c *cli.Context) {
 	dirs, err := ioutil.ReadDir(containers_root)
 	if err != nil {
@@ -38,7 +65,6 @@ func GetAll(c *cli.Context) {
 	}
 
 	for _, dir := range dirs {
-		fmt.Println("\nContainer " + dir.Name())
 		if err := GetConVolumes(dir); err != nil {
 			fmt.Println("Container " + dir.Name() + " has no volume details.")
 			continue
@@ -62,7 +88,7 @@ func GetConVolumes(dir os.FileInfo) error {
 	var config Config
 	_ = json.Unmarshal(configDataBytes, &config)
 
-	fmt.Println("Container ID:" + config.ID + "\nContainer Name:" + config.Name)
+	fmt.Println("Container ID: " + config.ID + "\nContainer Name: " + config.Name)
 
 	//fmt.Println(config)
 
@@ -103,12 +129,11 @@ func checkSize(filename string, path string) error {
 }
 
 func checkDataVolume(mounts map[string]Mount) error {
-	for _, value := range mounts {
+	for index, value := range mounts {
 		name := value.Name
 		//fmt.Println("Destination:" + destination)
 		volume_path := filepath.Join(volumes_root, name, "_data")
-		//fmt.Println("Source:" + volume_path)
-
+		fmt.Println(index, ".Source Dir:"+volume_path)
 		if name != "" {
 			// it means it is a data volume
 			size := 0
