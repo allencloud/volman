@@ -62,6 +62,8 @@ func GetConVolumes(dir os.FileInfo) error {
 	var config Config
 	_ = json.Unmarshal(configDataBytes, &config)
 
+	fmt.Println("Container ID:" + config.ID + "\nContainer Name:" + config.Name)
+
 	//fmt.Println(config)
 
 	var err error
@@ -75,6 +77,10 @@ func GetConVolumes(dir os.FileInfo) error {
 	}
 
 	if err = checkSize("hosts", config.HostsPath); err != nil {
+		fmt.Println("")
+	}
+
+	if err = checkSize("json-log", config.LogPath); err != nil {
 		fmt.Println("")
 	}
 
@@ -99,7 +105,6 @@ func checkSize(filename string, path string) error {
 func checkDataVolume(mounts map[string]Mount) error {
 	for _, value := range mounts {
 		name := value.Name
-		destination := value.Destination
 		//fmt.Println("Destination:" + destination)
 		volume_path := filepath.Join(volumes_root, name, "_data")
 		//fmt.Println("Source:" + volume_path)
