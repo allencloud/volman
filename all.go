@@ -39,7 +39,7 @@ func GetOne(c *cli.Context) {
 	}
 	sum := 0
 	var rightone os.FileInfo
-	input := c.Args()[2]
+	input := c.Args()[1]
 	fmt.Println(input)
 	for _, dir := range dirs {
 		if strings.Contains(dir.Name(), input) == true {
@@ -133,11 +133,12 @@ func checkDataVolume(mounts map[string]Mount) error {
 	index := 1
 	for _, value := range mounts {
 		name := value.Name
-		//fmt.Println("Destination:" + destination)
-		volume_path := filepath.Join(volumes_root, name, "_data")
-		fmt.Println(index, ". SourceDir: "+volume_path)
-		index++
 		if name != "" {
+			//fmt.Println("Destination:" + destination)
+			volume_path := filepath.Join(volumes_root, name, "_data")
+			fmt.Println(index, ". SourceDir: "+volume_path)
+			index++
+
 			// it means it is a data volume
 			size := 0
 			filepath.Walk(volume_path, func(_ string, file os.FileInfo, _ error) error {
