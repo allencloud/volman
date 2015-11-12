@@ -69,6 +69,7 @@ func GetAll(c *cli.Context) {
 			fmt.Println("Container " + dir.Name() + " has no volume details.")
 			continue
 		}
+		fmt.Println("\n")
 	}
 }
 
@@ -129,11 +130,13 @@ func checkSize(filename string, path string) error {
 }
 
 func checkDataVolume(mounts map[string]Mount) error {
-	for index, value := range mounts {
+	index := 1
+	for _, value := range mounts {
 		name := value.Name
 		//fmt.Println("Destination:" + destination)
 		volume_path := filepath.Join(volumes_root, name, "_data")
-		fmt.Println(index, ".Source Dir:"+volume_path)
+		fmt.Println(index, ". SourceDir: "+volume_path)
+		index++
 		if name != "" {
 			// it means it is a data volume
 			size := 0
@@ -144,5 +147,6 @@ func checkDataVolume(mounts map[string]Mount) error {
 			fmt.Println("Volume Space Size:", size)
 		}
 	}
+
 	return nil
 }
