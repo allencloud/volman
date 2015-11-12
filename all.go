@@ -105,7 +105,7 @@ func checkDataVolume(mounts map[string]Mount) error {
 		volume_path := filepath.Join(volumes_root, name, "_data")
 		fmt.Println("Source:" + volume_path)
 
-		if strings.Contains(source, volumes_root) == true {
+		if strings.Contains(volume_path, volumes_root) == true {
 			// it means it is a data volume
 			size := 0
 			filepath.Walk(volume_path, func(_ string, file os.FileInfo, _ error) error {
